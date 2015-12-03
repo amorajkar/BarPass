@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ question.title }}</h1>
+<p>{{ question.description }}</p>
+<p>Asked {% if question.visibility == 0 %} by <a href="{% url 'user_detail' slug=question.user.username %}">{{ question.user.username }}</a> {% endif %} on {{ question.created_at }}</p>
+{% if question.user == user %}
+<p><a href="{% url 'question_update' pk=question.id %}">Edit question</a></p>
+<p><a href="{% url 'question_delete' pk=question.id %}">Delete question</a></p>
+{% endif %}
+{% if answers.count > 0 %}
+<h3>{{ answers.count }} Answer{{ answers.count|pluralize }}:</h3>
+{% endif %}
+{% for answer in answers %}
+<div class="panel">
+  <p>{{ answer.text }}</p>
+  {% if answer.user == user %}
+  <p><a href="{% url 'answer_update' question_pk=question.id answer_pk=answer.id %}">Edit answer</a></p>
+  <p><a href="{% url 'answer_delete' question_pk=question.id answer_pk=answer.id %}">Delete answer</a></p>
+  {% endif %}
+  <p>Answered {% if answer.visibility == 0 %} by <a href="{% url 'user_detail' slug=answer.user.username %}">{{ answer.user.username }}</a> {% endif %} on {{ answer.created_at }}</p>
+<form method="post" action="{% url 'vote' %}">
+    <span class="badge">{{ answer.vote_set.all.count }} Vote{{  answer.vote_set.all.count|pluralize }}</span>
+    {% csrf_token %}
+    <input type="hidden" name="answer" value="{{ answer.id }}" />
+    <input type="hidden" name="question" value="{{ question.id }}" />
+    <input type="hidden" name="user" value="{{ user.id }}" />
+    {% if answer in user_votes %}
+        <button class="btn btn-link">
+          <span class="glyphicon glyphicon-thumbs-down"></span>
+        </button>
+    {% else %}
+        <button class="btn btn-link">
+          <span class="glyphicon glyphicon-thumbs-up"></span>
+        </button>
+    {% endif %}
+</form>
+</div>
+{% endfor %}
+{% if not user_answers %}
+<p><a href="{% url 'answer_create' pk=question.id %}">Write</a></p>
+{% endif %}
+{% endblock %}

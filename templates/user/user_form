@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% block content %}
+<div class="row">
+<div class="col-lg-6">
+<form method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+</div>
+<p><a href="{% url 'password_change' %}">Change password</a></p>
+{% endblock %}
