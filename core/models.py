@@ -7,7 +7,7 @@ VISIBILITY_CHOICES = (
 )
 
 # Create your models here.
-class Question(models.Model):
+class Review(models.Model):
   title = models.CharField(max_length=300)
   description = models.TextField(null=True, blank=True)
   created_at = models.DateTimeField(auto_now_add=True)
@@ -18,10 +18,10 @@ class Question(models.Model):
     return self.title
 
   def get_absolute_url(self):
-    return reverse("question_detail", args=[self.id])
+    return reverse("review_detail", args=[self.id])
 
-class Answer(models.Model):
-  question = models.ForeignKey(Question)
+class Comment(models.Model):
+  review = models.ForeignKey(Review)
   user = models.ForeignKey(User)
   created_at = models.DateTimeField(auto_now_add=True)
   text = models.TextField()
@@ -32,8 +32,8 @@ class Answer(models.Model):
 
 class Vote(models.Model):
     user = models.ForeignKey(User)
-    question = models.ForeignKey(Question, blank=True, null=True)
-    answer = models.ForeignKey(Answer, blank=True, null=True)
+    review = models.ForeignKey(Review, blank=True, null=True)
+    comment = models.ForeignKey(Comment, blank=True, null=True)
 
     def __unicode__(self):
         return "%s upvoted" % (self.user.username)

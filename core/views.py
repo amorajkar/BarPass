@@ -11,105 +11,105 @@ from .forms import *
 class Home(TemplateView):
   template_name = "home.html"
 
-class QuestionCreateView(CreateView):
-    model = Question
-    template_name = "question/question_form.html"
+class ReviewCreateView(CreateView):
+    model = Review
+    template_name = "review/review_form.html"
     fields = ['title', 'description', 'visibility']
-    success_url = reverse_lazy('question_list')
+    success_url = reverse_lazy('review_list')
 
     def form_valid(self, form):
       form.instance.user = self.request.user
-      return super(QuestionCreateView, self).form_valid(form)
+      return super(ReviewCreateView, self).form_valid(form)
 
-class QuestionListView(ListView):
-    model = Question
-    template_name = "question/question_list.html"
+class ReviewListView(ListView):
+    model = Review
+    template_name = "review/review_list.html"
     paginate_by = 5
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionListView, self).get_context_data(**kwargs)
-        user_votes = Question.objects.filter(vote__user=self.request.user)
+        context = super(ReviewListView, self).get_context_data(**kwargs)
+        user_votes = Review.objects.filter(vote__user=self.request.user)
         context['user_votes'] = user_votes
         return context
 
-class QuestionDetailView(DetailView):
-    model = Question
-    template_name = 'question/question_detail.html'
+class ReviewDetailView(DetailView):
+    model = Review
+    template_name = 'review/review_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionDetailView, self).get_context_data(**kwargs)
-        question = Question.objects.get(id=self.kwargs['pk'])
-        answers = Answer.objects.filter(question=question)
-        context['answers'] = answers
-        user_answers = Answer.objects.filter(question=question, user=self.request.user)
-        context['user_answers'] = user_answers
-        user_votes = Answer.objects.filter(vote__user=self.request.user)
+        context = super(ReviewDetailView, self).get_context_data(**kwargs)
+        review = Review.objects.get(id=self.kwargs['pk'])
+        comments = Comment.objects.filter(review=review)
+        context['comments'] = comments
+        user_comments = Comment.objects.filter(review=review, user=self.request.user)
+        context['user_comments'] = user_comments
+        user_votes = Comment.objects.filter(vote__user=self.request.user)
         context['user_votes'] = user_votes
         return context
 
-class QuestionUpdateView(UpdateView):
-    model = Question
-    template_name = 'question/question_form.html'
+class ReviewUpdateView(UpdateView):
+    model = Review
+    template_name = 'review/review_form.html'
     fields = ['title', 'description']
 
     def get_object(self, *args, **kwargs):
-            object = super(QuestionUpdateView, self).get_object(*args, **kwargs)
+            object = super(ReviewUpdateView, self).get_object(*args, **kwargs)
             if object.user != self.request.user:
                 raise PermissionDenied()
             return object
 
-class QuestionDeleteView(DeleteView):
-    model = Question
-    template_name = 'question/question_confirm_delete.html'
-    success_url = reverse_lazy('question_list')
+class ReviewDeleteView(DeleteView):
+    model = Review
+    template_name = 'review/review_confirm_delete.html'
+    success_url = reverse_lazy('review_list')
 
     def get_object(self, *args, **kwargs):
-            object = super(QuestionDeleteView, self).get_object(*args, **kwargs)
+            object = super(ReviewDeleteView, self).get_object(*args, **kwargs)
             if object.user != self.request.user:
                 raise PermissionDenied()
             return object
 
-class AnswerCreateView(CreateView):
-    model = Answer
-    template_name = "answer/answer_form.html"
+class CommentCreateView(CreateView):
+    model = Comment
+    template_name = "comment/comment_form.html"
     fields = ['text', 'visibility']
 
     def get_success_url(self):
-        return self.object.question.get_absolute_url()
+        return self.object.review.get_absolute_url()
 
     def form_valid(self, form):
-        question = Question.objects.get(id=self.kwargs['pk'])
-        if Answer.objects.filter(question=question, user=self.request.user).exists():
+        review = Review.objects.get(id=self.kwargs['pk'])
+        if Comment.objects.filter(review=review, user=self.request.user).exists():
           raise PermissionDenied()
         form.instance.user = self.request.user
-        form.instance.question = Question.objects.get(id=self.kwargs['pk'])
-        return super(AnswerCreateView, self).form_valid(form)
+        form.instance.review = Review.objects.get(id=self.kwargs['pk'])
+        return super(CommentCreateView, self).form_valid(form)
 
-class AnswerUpdateView(UpdateView):
-    model = Answer
-    pk_url_kwarg = 'answer_pk'
-    template_name = 'answer/answer_form.html'
+class CommentUpdateView(UpdateView):
+    model = Comment
+    pk_url_kwarg = 'comment_pk'
+    template_name = 'comment/comment_form.html'
     fields = ['text']
 
     def get_success_url(self):
-        return self.object.question.get_absolute_url()
+        return self.object.review.get_absolute_url()
 
     def get_object(self, *args, **kwargs):
-            object = super(AnswerUpdateView, self).get_object(*args, **kwargs)
+            object = super(CommentUpdateView, self).get_object(*args, **kwargs)
             if object.user != self.request.user:
                 raise PermissionDenied()
             return object
 
-class AnswerDeleteView(DeleteView):
-    model = Answer
-    pk_url_kwarg = 'answer_pk'
-    template_name = 'answer/answer_confirm_delete.html'
+class CommentDeleteView(DeleteView):
+    model = Comment
+    pk_url_kwarg = 'comment_pk'
+    template_name = 'comment/comment_confirm_delete.html'
 
     def get_success_url(self):
-        return self.object.question.get_absolute_url()
+        return self.object.review.get_absolute_url()
 
     def get_object(self, *args, **kwargs):
-            object = super(AnswerDeleteView, self).get_object(*args, **kwargs)
+            object = super(CommentDeleteView, self).get_object(*args, **kwargs)
             if object.user != self.request.user:
                 raise PermissionDenied()
             return object
@@ -119,24 +119,24 @@ class VoteFormView(FormView):
 
     def form_valid(self, form):
         user = self.request.user
-        question = Question.objects.get(pk=form.data["question"])
+        review = Review.objects.get(pk=form.data["review"])
         try:
-            answer = Answer.objects.get(pk=form.data["answer"])
-            prev_votes = Vote.objects.filter(user=user, answer=answer)
+            comment = Comment.objects.get(pk=form.data["comment"])
+            prev_votes = Vote.objects.filter(user=user, comment=comment)
             has_voted = (prev_votes.count()>0)
             if not has_voted:
-                Vote.objects.create(user=user, answer=answer)
+                Vote.objects.create(user=user, comment=comment)
             else:
                 prev_votes[0].delete()
-            return redirect(reverse('question_detail', args=[form.data["question"]]))
+            return redirect(reverse('review_detail', args=[form.data["review"]]))
         except:
-            prev_votes = Vote.objects.filter(user=user, question=question)
+            prev_votes = Vote.objects.filter(user=user, review=review)
             has_voted = (prev_votes.count()>0)
             if not has_voted:
-                Vote.objects.create(user=user, question=question)
+                Vote.objects.create(user=user, review=review)
             else:
                 prev_votes[0].delete()
-        return redirect('question_list')
+        return redirect('review_list')
 
 class UserDetailView(DetailView):
     model = User
@@ -147,10 +147,10 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
         user_in_view = User.objects.get(username=self.kwargs['slug'])
-        questions = Question.objects.filter(user=user_in_view).exclude(visibility=1)
-        context['questions'] = questions
-        answers = Answer.objects.filter(user=user_in_view).exclude(visibility=1)
-        context['answers'] = answers
+        review = Review.objects.filter(user=user_in_view).exclude(visibility=1)
+        context['reviews'] = reviews
+        comments = Comment.objects.filter(user=user_in_view).exclude(visibility=1)
+        context['comments'] = comments
         return context
 
 class UserUpdateView(UpdateView):
@@ -188,7 +188,7 @@ class UserDeleteView(DeleteView):
         user.save()
         return redirect(self.get_success_url())
 
-class SearchQuestionListView(QuestionListView):
+class SearchReviewListView(ReviewListView):
     def get_queryset(self):
         incoming_query_string = self.request.GET.get('query','')
-        return Question.objects.filter(title__icontains=incoming_query_string)
+        return Review.objects.filter(title__icontains=incoming_query_string)

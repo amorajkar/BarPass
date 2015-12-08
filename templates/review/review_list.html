@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
-{% for question in object_list %}
+{% for review in object_list %}
 <div class="panel">
-  <h3><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></h3>
-  <p>Asked {% if question.visibility == 0 %} by <a href="{% url 'user_detail' slug=question.user.username %}">{{ question.user.username }}</a> {% endif %} on {{ question.created_at }}</p>
+  <h3><a href="{{ review.get_absolute_url }}">{{ review.title }}</a></h3>
+  <p>Asked {% if review.visibility == 0 %} by <a href="{% url 'user_detail' slug=review.user.username %}">{{ review.user.username }}</a> {% endif %} on {{ review.created_at }}</p>
   <form method="post" action="{% url 'vote' %}">
-    <span class="badge">{{ question.answer_set.all.count }} Answer{{  question.answer_set.all.count|pluralize }}</span>
-    <span class="badge">{{ question.vote_set.all.count }} Vote{{ question.vote_set.all.count|pluralize }}</span>
+    <span class="badge">{{ review.comment_set.all.count }} Comment{{  review.comment_set.all.count|pluralize }}</span>
+    <span class="badge">{{ review.vote_set.all.count }} Vote{{ review.vote_set.all.count|pluralize }}</span>
     {% csrf_token %}
-    <input type="hidden" name="question" value="{{ question.id }}" />
+    <input type="hidden" name="review" value="{{ review.id }}" />
     <input type="hidden" name="user" value="{{ user.id }}" />
-        {% if question in user_votes %}
+        {% if review in user_votes %}
         <button class="btn btn-link">
           <span class="glyphicon glyphicon-thumbs-down"></span>
         </button>

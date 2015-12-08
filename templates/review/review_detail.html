@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ review.title }}</h1>
+<p>{{ review.description }}</p>
+<p>Asked {% if review.visibility == 0 %} by <a href="{% url 'user_detail' slug=review.user.username %}">{{ review.user.username }}</a> {% endif %} on {{ review.created_at }}</p>
+{% if review.user == user %}
+<p><a href="{% url 'review_update' pk=review.id %}">Edit review</a></p>
+<p><a href="{% url 'review_delete' pk=review.id %}">Delete review</a></p>
+{% endif %}
+{% if comments.count > 0 %}
+<h3>{{ comments.count }} Comment{{ comments.count|pluralize }}:</h3>
+{% endif %}
+{% for comment in comments %}
+<div class="panel">
+  <p>{{ comment.text }}</p>
+  {% if comment.user == user %}
+  <p><a href="{% url 'comment_update' review_pk=review.id comment_pk=comment.id %}">Edit comment</a></p>
+  <p><a href="{% url 'comment_delete' review_pk=review.id comment_pk=comment.id %}">Delete comment</a></p>
+  {% endif %}
+  <p>Commented {% if comment.visibility == 0 %} by <a href="{% url 'user_detail' slug=comment.user.username %}">{{ comment.user.username }}</a> {% endif %} on {{ comment.created_at }}</p>
+<form method="post" action="{% url 'vote' %}">
+    <span class="badge">{{ comment.vote_set.all.count }} Vote{{  comment.vote_set.all.count|pluralize }}</span>
+    {% csrf_token %}
+    <input type="hidden" name="comment" value="{{ comment.id }}" />
+    <input type="hidden" name="review" value="{{ review.id }}" />
+    <input type="hidden" name="user" value="{{ user.id }}" />
+    {% if comment in user_votes %}
+        <button class="btn btn-link">
+          <span class="glyphicon glyphicon-thumbs-down"></span>
+        </button>
+    {% else %}
+        <button class="btn btn-link">
+          <span class="glyphicon glyphicon-thumbs-up"></span>
+        </button>
+    {% endif %}
+</form>
+</div>
+{% endfor %}
+{% if not user_comments %}
+<p><a href="{% url 'comment_create' pk=review.id %}">Write</a></p>
+{% endif %}
+{% endblock %}
