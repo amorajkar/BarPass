@@ -2,7 +2,7 @@
 {% block content %}
 <p class="lead">Are you sure you want to delete "{{ comment.text }}"?</p>
 <form method="post" action="">
-    {% csrf_token %}
+  {% csrf_token %}
   <button type="submit" class="btn btn-primary">Delete</button>
 </form>
 {% endblock %}

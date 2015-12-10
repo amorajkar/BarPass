@@ -147,7 +147,7 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
         user_in_view = User.objects.get(username=self.kwargs['slug'])
-        review = Review.objects.filter(user=user_in_view).exclude(visibility=1)
+        reviews = Review.objects.filter(user=user_in_view).exclude(visibility=1)
         context['reviews'] = reviews
         comments = Comment.objects.filter(user=user_in_view).exclude(visibility=1)
         context['comments'] = comments

@@ -10,29 +10,29 @@
     {% csrf_token %}
     <input type="hidden" name="review" value="{{ review.id }}" />
     <input type="hidden" name="user" value="{{ user.id }}" />
-        {% if review in user_votes %}
-        <button class="btn btn-link">
-          <span class="glyphicon glyphicon-thumbs-down"></span>
-        </button>
-        {% else %}
-        <button class="btn btn-link">
-          <span class="glyphicon glyphicon-thumbs-up"></span>
-        </button>
-        {% endif %}
-    </form>
+    {% if review in user_votes %}
+    <button class="btn btn-link">
+      <span class="glyphicon glyphicon-thumbs-down"></span>
+    </button>
+    {% else %}
+    <button class="btn btn-link">
+      <span class="glyphicon glyphicon-thumbs-up"></span>
+    </button>
+    {% endif %}
+  </form>
 </div>
 {% empty %}
 <p>No results found.</p>
 {% endfor %}
 {% if is_paginated %}
 <nav>
-    <ul class="pager">
-        {% if page_obj.has_previous %}
-      <li><a href="?page={{ page.obj.previous_page_number }}">Previous</a></li>
-      {% endif %}
-      {% if page_obj.has_next %}
-      <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
-      {% endif %}
+  <ul class="pager">
+    {% if page_obj.has_previous %}
+    <li><a href="?page={{ page.obj.previous_page_number }}">Previous</a></li>
+    {% endif %}
+    {% if page_obj.has_next %}
+    <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+    {% endif %}
   </ul>
 </nav>
 {% endif %}
